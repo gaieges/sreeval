@@ -1,0 +1,12 @@
+FROM python:3-alpine
+WORKDIR /usr/src/app
+
+ENV BIND_PORT 1234
+EXPOSE ${BIND_PORT}
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["python", "app.py"]
