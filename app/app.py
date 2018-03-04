@@ -40,10 +40,13 @@ print('waiting for messages..')
 while True:
   data, addr = sock.recvfrom(1024) # buffer size
 
+  if not data or data == 'X':
+    continue
+
   msg = data.decode('utf-8')
   print(f'from {addr[0]} got: {msg}')
 
-  try:
+  try: # to get datestamp from message
     msg_match = MESSAGE_FORMAT.search(msg)
     msg_time = parse(msg_match.group(1))
     msg_content = msg_match.group(2)
@@ -52,13 +55,13 @@ while True:
       'message': msg_content,
       'container': socket.gethostname(),
       'hostname': addr[0],
-      'timestamp': msg_time.strftime('%s'),
+      'timestamp': int(msg_time.strftime('%s')),
     })
 
     print(f'responding with: {output}\n')
     sock.sendto(bytes(f'{output}\n', 'utf-8'), addr)
   except Exception as e:
-    err = f'cant parse message: {e}'
+    err = json.dumps({'error': f'cant parse message: {e}'})
     print(err)
     sock.sendto(bytes(f'{err}\n', 'utf-8'), addr)
 
